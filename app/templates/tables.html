@@ -1,0 +1,138 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h2>Manage Entries</h2>
+
+<style>
+    .edit-icon {
+        visibility: hidden;
+        cursor: pointer;
+    }
+
+    tr:hover .edit-icon {
+        visibility: visible;
+    }
+</style>
+
+{% if entries %}
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in entries.items %}
+        <tr>
+            <td>
+                <span class="edit-icon" data-bs-toggle="modal" data-bs-target="#editModal{{ entry.id }}">
+                    ✏️
+                </span>
+                {{ entry.date }}
+            </td>
+            <td>{{ entry.type }}</td>
+            <td>${{ "%.2f"|format(entry.amount) }}</td>
+            <td>{{ entry.category }}</td>
+            <td>{{ entry.description }}</td>
+            <td>
+                <form action="{{ url_for('main.delete_entry', entry_id=entry.id) }}" method="POST">
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDelete{{ entry.id }}">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+        
+        <div class="modal fade" id="editModal{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('main.edit_entry', entry_id=entry.id) }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Edit Entry #{{ entry.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                <label>Type:</label>
+                <select name="type" class="form-select mb-2">
+                    <option value="Income" {% if entry.type == 'Income' %}selected{% endif %}>Income</option>
+                    <option value="Expense" {% if entry.type == 'Expense' %}selected{% endif %}>Expense</option>
+                </select>
+                <label>Amount:</label>
+                <input type="number" name="amount" step="0.01" class="form-control mb-2" value="{{ entry.amount }}" required>
+                <label>Category:</label>
+                <input type="text" name="category" class="form-control mb-2" value="{{ entry.category }}" required>
+                <label>Description:</label>
+                <input type="text" name="description" class="form-control mb-2" value="{{ entry.description }}">
+                <label>Date:</label>
+                <input type="date" name="date" class="form-control mb-2" value="{{ entry.date }}">
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to save changes?')">Save Changes</button>
+                </div>
+            </div>
+            </form>
+        </div>
+        </div>
+
+        <div class="modal fade" id="confirmDelete{{ entry.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="{{ url_for('main.delete_entry', entry_id=entry.id) }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                Are you sure you want to delete entry #{{ entry.id }}?
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+            </form>
+        </div>
+        </div>
+
+        {% endfor %}
+        </tbody>
+    </table>
+    <nav>
+    <ul class="pagination justify-content-center">
+        {% if entries.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.tables', page=entries.prev_num) }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Previous</span>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+        <span class="page-link">Page {{ entries.page }} of {{ entries.pages }}</span>
+        </li>
+
+        {% if entries.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.tables', page=entries.next_num) }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Next</span>
+        </li>
+        {% endif %}
+    </ul>
+    </nav>
+
+{% else %}
+    <p>No entries to display.</p>
+{% endif %}
+
+{% endblock %}

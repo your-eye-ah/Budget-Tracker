@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>Expense Breakdown by Category</h2>
+    <h7>Hover over for more info. Click on a category below to deselect</h7>
+    <canvas id="pieChart" width="400" height="400"></canvas>
+    <h2 class="mt-5">Monthly Income vs Expenses</h2>
+    <canvas id="lineChart" width="600" height="300"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        const pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: {{ labels|tojson }},
+                datasets: [{
+                    label: 'Expenses by Category',
+                    data: {{ values|tojson }},
+                    backgroundColor: [
+                        '#f94144', '#f3722c', '#f8961e', '#f9844a',
+                        '#f9c74f', '#90be6d', '#43aa8b', '#577590'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ bar_labels|tojson }},
+            datasets: [
+                {
+                    label: 'Income',
+                    data: {{ bar_income|tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+                },
+                {
+                    label: 'Expenses',
+                    data: {{ bar_expense|tojson }},
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    </script>
+
+
+{% endblock %}
